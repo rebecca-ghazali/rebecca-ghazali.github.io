@@ -1,0 +1,71 @@
+<!-- Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT License. -->
+
+<!DOCTYPE html>
+<html>
+
+<body>
+  <script src="https://statics.teams.cdn.office.net/sdk/v1.5.2/js/MicrosoftTeams.min.js" crossorigin="anonymous"></script>
+  <script src="https://secure.aadcdn.microsoftonline-p.com/lib/1.0.17/js/adal.min.js" crossorigin="anonymous"></script>
+
+  <script type="text/javascript">
+  console.log("hello auth start")
+    microsoftTeams.initialize();
+    microsoftTeams.getContext(function (msTeamsContext) {
+
+      // ADAL.js configuration
+      let config = {
+        clientId: "82d3a31f-c0ad-4fbb-ad83-00704bfee30d",
+        redirectUri: window.location.origin + "/auth-end.html",
+        cacheLocation: "localStorage",
+        endpoints: {
+          "https://graph.microsoft.com": "https://graph.microsoft.com"
+        },
+      };
+
+      let client_id = "82d3a31f-c0ad-4fbb-ad83-00704bfee30d";
+      let redirect_uri = window.location.origin + "/auth-end.html";
+
+      // add extra query parameters AzureAD login request
+      //  include scope for OpenID connect & login-hint using current MSTeams logged in user
+      config.extraQueryParameters = "scope=open+profile";
+      if (msTeamsContext.upn) {
+        config.extraQueryParameters += "&login-hint=" + encodeURIComponent(msTeamsContext.userProfileName);
+      }
+      // check if consent required for new permission
+      if (getUrlParameter('prompt') !== "") {
+        config.extraQueryParameters += "&prompt=" + getUrlParameter('prompt');
+      }
+
+// extra permissions
+      //%20User.Read.All%20Group.Read.All%20Group.ReadWrite.All
+
+      // override URL to AzureAD auth endpoint to include extra query params
+      config.displayCall = function (urlNavigate) {
+        let authorizeEndpoint = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize?scope=offline_access%20Team.ReadBasic.All%20User.Read%20Group.Selected&client_id='+client_id+'&redirect_uri='+ redirect_uri +'&response_type=code&response_mode=query'
+
+
+        /*if (urlNavigate) {
+          if (config.extraQueryParameters) {
+            urlNavigate += "&" + config.extraQueryParameters;
+          }
+          window.location.replace(urlNavigate);
+        }*/
+        window.location.replace(authorizeEndpoint)
+      }
+
+      // login
+      let authContext = new AuthenticationContext(config);
+      authContext.clearCache();
+      authContext.login();
+    });
+
+    function getUrlParameter(name) {
+      name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+      var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+      var results = regex.exec(location.search);
+      return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    };
+  </script>
+</body>
+
+</html>
