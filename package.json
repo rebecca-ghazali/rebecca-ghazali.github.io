@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node dist/server.js",
     "build": "gulp build",
-    "debug": "gulp serve --debug"
+    "debug": "gulp serve --debug",
+    "predeploy": "gulp build",
+    "deploy": "gh-pages -d build"
   },
   "dependencies": {
     "@fluentui/react": "~0.45.0",
